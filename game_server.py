@@ -7,7 +7,7 @@ s.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
 s.bind(("0.0.0.0",6996))
 s.listen(3)
 socket_l=Queue()
-l=[]
+l={}
 fa1,fa2=Pipe(False)     
 def shuju_s(c):
     while True:
@@ -35,13 +35,20 @@ if p==0:
 else:
     while True:
         c,a=s.accept()
-        l.append(c)
-        socket_l.put(l)
-        p=fork()
-        if p==0:
-            shuju_s(c)
-        else:
-            continue
+        while True:
+            data=c.recv(128)
+            name=data.decode()
+            if name not in l.values():
+                c.send(b"OK")
+                l[c]=name
+                socket_l.put(l)
+                p=fork()
+                if p==0:
+                    shuju_s(c)
+                else:
+                    break
+            else:
+                c.send(b"NO")
 
 
    # ---------------------- 
