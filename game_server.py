@@ -1,17 +1,19 @@
 from socket import *
 from os import fork
 from multiprocessing import  Pipe,Queue
+from time import sleep
 
 s=socket(family=AF_INET,type=SOCK_STREAM,proto=0)
 s.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
-s.bind(("0.0.0.0",6996))
+s.bind(("0.0.0.0",6995))
 s.listen(3)
 socket_l=Queue()
 l={}
 fa1,fa2=Pipe(False)     
 def shuju_s(c):
     while True:
-        data=c.recv(128)
+        data=c.recv(15)
+        print(len(data.decode()))
         print(data.decode())
         fa2.send(data)
 
@@ -42,6 +44,7 @@ else:
                 c.send(b"OK")
                 l[c]=name
                 socket_l.put(l)
+                sleep(0.01)
                 p=fork()
                 if p==0:
                     shuju_s(c)

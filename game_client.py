@@ -7,7 +7,7 @@ import random
 from time import sleep
 from threading import Thread
 c=socket()
-c.connect(("127.0.0.1",6996))
+c.connect(("127.0.0.1",6995))
 fa1,fa2=Pipe()
 fb1,fb2=Pipe()
 name=input("输入昵称：")
@@ -27,6 +27,9 @@ def shuju_f(c):
         x=data[0]
         y=data[1]
         data=name+","+str(x)+","+str(y)
+        if len(data) !=15:
+            n=15-len(data)
+            data=data+","+"#"*(n-1)
         c.send(data.encode())
         # sleep(2)
 def shuju_s(c):
@@ -47,7 +50,7 @@ def shuju():
         name=data[0]
         x=int(data[1])
         y=int(data[2])
-        sleep(1)
+        sleep(0.01)
         
 
 
