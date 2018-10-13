@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 from random import randint
 from time import sleep
+from sys import exit
+pygame.init() 
 herol=pygame.image.load("./image/tankel.bmp")
 heror=pygame.image.load("./image/tanker.bmp")
 herou=pygame.image.load("./image/tankeu.bmp")
@@ -10,6 +12,8 @@ zidan1=pygame.image.load("./image/zidian1.bmp")
 zidan2=pygame.image.load("./image/zidian2.bmp")
 tanke_image={"l":herol,"r":heror,"u":herou,"d":herod}
 #英雄类
+screen=pygame.display.set_mode((800,600),0,32)
+SCREEN_COLLOR=(255,255,255)
 class Tanke():
     def __init__(self,screen,x,y,z):
         self.screen=screen
@@ -29,19 +33,14 @@ class Tanke():
             self.screen.blit(self.image["l"],(self.x,self.y))
 
 
-def game_main():
-    pygame.init()
-    screen=pygame.display.set_mode((800,600),0,32)
-    SCREEN_COLLOR=(255,255,255)
-    while True:
-        x=randint(0,800)
-        y=randint(0,600)
-        z=randint(1,4)
-        screen.fill(SCREEN_COLLOR)
-        tanke=Tanke(screen,x,y,z)
-        tanke.show()
-        pygame.display.update()
-        sleep(0.5)
-
-game_main()
+def game_main(tanke):
+    screen.fill(SCREEN_COLLOR)
+    for i in tanke:
+        x=tanke[i][0]
+        y=tanke[i][1]
+        z=tanke[i][2]
+        t=Tanke(screen,x,y,z)
+        t.show()
+    pygame.display.update()
+    # sleep(0.05)
 
