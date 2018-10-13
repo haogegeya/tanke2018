@@ -9,14 +9,16 @@ s.bind(("0.0.0.0",6995))
 s.listen(3)
 socket_l=Queue()
 l={}
-fa1,fa2=Pipe(False)     
+fa1,fa2=Pipe(False)
+
+#接受玩家的数据   
 def shuju_s(c):
     while True:
         data=c.recv(15)
         print(len(data.decode()))
         print(data.decode())
         fa2.send(data)
-
+#把接受的任意来源的数据发送给所有人
 def shuju_f():
     while True:
         print("---------------")
@@ -33,6 +35,7 @@ def shuju_f():
 
 p=fork()
 if p==0:
+#发送数据的进程
     shuju_f()
 else:
     while True:
@@ -47,42 +50,9 @@ else:
                 sleep(0.01)
                 p=fork()
                 if p==0:
+#每连接一个玩家就单独创建一个进程接受此玩家的数据
                     shuju_s(c)
                 else:
                     break
             else:
                 c.send(b"NO")
-
-
-   # ---------------------- 
-    # if p==0:
-    #     do_shuju_s(c)
-    # else:
-    #     p=fork()
-    #     if p==0:
-    #         shuju_f(l)
-    #     else:
-    #         continue
-   # ---------------------- 
-   # ---------------------- 
-    # if p==0:
-    #     q=fork()
-    #     if q==0:
-    #         shuju_s(c)
-    #     elif q>0:
-    #         shuju_f()
-    #     else:
-    #         print("创建进程失败")
-    # else:
-    #     continue
-   # ---------------------- 
-
-
-
-
-
-
-
-
-
-    
