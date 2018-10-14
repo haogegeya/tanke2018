@@ -9,7 +9,8 @@ from threading import Thread
 from game_main import *
 
 c=socket()
-c.connect(("127.0.0.1",6995))
+c.connect(("127.0.0.1",6999))
+# c.connect(("192.168.43.161",6995))
 #后面收数据，发数据，产生数据模块，游戏主逻辑分为四个进程，下面管道用于进程通信
 fa1,fa2=Pipe()
 fb1,fb2=Pipe()
@@ -40,19 +41,25 @@ def shuju_f(c):
             n=15-len(data)
             data=data+","+"#"*(n-1)
         c.send(data.encode())
+        #处理进程退出
+        if z==0:
+            break
 
 #接受数据模块
 def shuju_s(c):
     while True:
         data=c.recv(15)
+        print(data)
         data=data.decode().split(",")
         name=data[0]
         x=data[1]
         y=data[2]
         z=data[3]
         e=data[4]
-        # fb2.send((name,int(x),int(y),int(z),int(e)))
-        q.put((name,int(x),int(y),int(z),int(e)))
+        q.put([name,int(x),int(y),int(z),int(e)])
+        #处理进程退出
+        if NAME==name and int(z)==0:
+            break
 
 #数据产生及更新模块
 def shuju():
@@ -93,19 +100,14 @@ def shuju():
         y+=move_y
         fa2.send((x,y,z,e))
         e=0
+        #处理进程退出
+        if z==0:
+            break
 
 #游戏主逻辑模块
 def main():
     tanke={}
-    # sleep(0.1)
     while True:
-        # data=fb1.recv()
-        # if q.empty():
-        #     data=data_none
-        #     data_none=(data[0],data[1],data[2],data[3],0)
-        # else:
-        #     data=q.get()
-        #     data_none=data
         try:
             data=q.get(False)
         except:
@@ -116,22 +118,31 @@ def main():
             else:
                 pass
         else:
-            data_none=data
-            data_none=(data[0],data[1],data[2],data[3],0)
-
-
-        # if data[4]==1:
-        #     print("-----------")
-        tanke[data[0]]=(data[1],data[2],data[3],data[4])
+            data_none=data.copy()
+            data_none[4]=0
+        #处理进程退出
+        if data[3]==0 and data[0]==NAME:
+            break
+        #这里数据放入列表方便后面更改数据
+        tanke[data[0]]=[data[1],data[2],data[3],data[4]]
         print(tanke)
         game_main(tanke)
         sleep(0.001)
 
-p1=Process(target=shuju_f,args=(c,))
-p2=Process(target=shuju_s,args=(c,))
-p3=Process(target=main)
-p4=Process(target=shuju)
-p1.start()
-p2.start()
-p3.start()
-p4.start()
+p_list=[]
+for i in range(4):
+    if i==0:
+        p=Process(target=shuju_f,args=(c,))
+    elif i==2:    
+        p=Process(target=shuju_s,args=(c,))
+    elif i==3:
+        p=Process(target=main)
+    else:  
+        p=Process(target=shuju)
+    p_list.append(p)
+    p.start()
+
+for i in p_list:
+    i.join()
+# sleep(100)
+c.close()

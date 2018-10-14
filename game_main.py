@@ -3,6 +3,7 @@ from pygame.locals import *
 from random import randint
 from time import sleep
 from sys import exit
+from xiangjiaopanduan import *
 pygame.init() 
 herol=pygame.image.load("./image/tankel.bmp")
 heror=pygame.image.load("./image/tanker.bmp")
@@ -13,6 +14,11 @@ zidan2=pygame.image.load("./image/zidian2.bmp")
 tanke_image={"l":herol,"r":heror,"u":herou,"d":herod}
 screen=pygame.display.set_mode((800,600),0,32)
 SCREEN_COLLOR=(255,255,255)
+
+z_width=zidan1.get_width()
+z_height=zidan1.get_height()
+t_width=herol.get_width()
+t_height=herol.get_height()
 #坦克类
 class Tanke():
     def __init__(self,screen,x,y,z):
@@ -31,6 +37,13 @@ class Tanke():
             self.screen.blit(self.image["d"],(self.x,self.y))
         if self.z==4:
             self.screen.blit(self.image["l"],(self.x,self.y))
+
+    def tanke_die(self,zidan_list):
+        for zidan_i in zidan_list:
+            if ju_ju(zidan_i.x,zidan_i.y,z_width,z_height,self.x,self.y,t_width,t_height):
+                return True
+            else:
+                return False
 
 #子弹类
 class Zidan():
@@ -63,28 +76,42 @@ class Zidan():
             return True
 #这是个放子弹的列表
 zidan_list=[]
-def game_main(tanke):
-    screen.fill(SCREEN_COLLOR)
-    # print(len(tanke))
+#处理所有坦克的子弹
+def zidan_show(tanke):
+    global zidan_list
+    for i in tanke:
+        e=tanke[i][3]
+        if e==1:
+            x=tanke[i][0]
+            y=tanke[i][1]
+            z=tanke[i][2]
+            zidan=Zidan(screen,x,y,z)
+            zidan_list.append(zidan)
+            print(len(zidan_list))
+    for i in zidan_list:
+        if i.die():
+            zidan_list.remove(i)
+        i.show()
+        i.move()
+
+
+#显示坦克的位置
+def tanke_show(tanke):
     for i in tanke:
         x=tanke[i][0]
         y=tanke[i][1]
         z=tanke[i][2]
-        e=tanke[i][3]
         t=Tanke(screen,x,y,z)
-        t.show()
-        if e==1:
-            # print(e)
-            zidan=Zidan(screen,x,y,z)
-            zidan_list.append(zidan)
-            # tanke[i][3]=0
-        print(len(zidan_list))
-        for i in zidan_list:
-            if i.die():
-                zidan_list.remove(i)
-            i.show()
-            i.move()
+        if t.tanke_die(zidan_list):
+            pass
+        else:
+            t.show()
 
+
+
+
+def game_main(tanke):
+    screen.fill(SCREEN_COLLOR)
+    tanke_show(tanke)
+    zidan_show(tanke)
     pygame.display.update()
-    # sleep(0.05)
-
