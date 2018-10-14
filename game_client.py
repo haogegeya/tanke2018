@@ -1,3 +1,4 @@
+#!usr/bin/env python3
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -22,7 +23,6 @@ while True:
     data=c.recv(128)
     if data==b"OK":
         NAME=name
-        # name_shuju=(name,x,y)
         break
     else:
         name=input("重复了，重新输入：")
@@ -49,7 +49,7 @@ def shuju_f(c):
 def shuju_s(c):
     while True:
         data=c.recv(15)
-        print(data)
+        # print(data)
         data=data.decode().split(",")
         name=data[0]
         x=data[1]
@@ -125,7 +125,7 @@ def main():
             break
         #这里数据放入列表方便后面更改数据
         tanke[data[0]]=[data[1],data[2],data[3],data[4]]
-        print(tanke)
+        # print(tanke)
         game_main(tanke)
         sleep(0.001)
 

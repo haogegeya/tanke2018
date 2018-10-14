@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from socket import *
 from os import fork
 from multiprocessing import  Pipe,Queue
@@ -17,14 +18,11 @@ fa1,fa2=Pipe(False)
 def shuju_s(c,name):
     while True:
         data=c.recv(15)
-        # print(len(data.decode()))
-        # print(data.decode())
         if data==b"":
             socket_L.put(name)
             exit()
         else:
             fa2.send(data)
-        # fa2.send(data)
 #把接受的任意来源的数据发送给所有人
 def shuju_f():
     #把退出了的客户端放在一个列表
@@ -36,20 +34,12 @@ def shuju_f():
             pass
         else:
             l=socket_l.get()
-        # if socket_L.empty():
-        #     pass
-        # else:
-        #     c=socket_L.get()
-            # exit_c.append(c)
-            # socket_L.put(c)
-        # print(data)
-        # print(len(l))
+        
+        #下面的这几行代码用来处理某个客户端退出与下面的代码片段2一起作用,简直是艺术
         for i in l:
             try:
                 i.send(data)
-                print(data)
             except:
-                print(len(l))
                 print("断开了链接")
                 exit_c=i
         if exit_c != "":
@@ -70,10 +60,7 @@ else:
         print("等待连接中．．．．．．")
         c,a=s.accept()
         while True:
-            # if socket_l.empty():
-            #     pass
-            # else:
-            #     l=socket_l.get()
+            #代码片段2
             if socket_L.empty():
                 pass
             else:
@@ -83,7 +70,7 @@ else:
                         exit_c=i
                 l.pop(exit_c)
                 socket_l.put(l)
-                print("-----------------------------------------")
+    
 
             data=c.recv(128)
             name=data.decode()

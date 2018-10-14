@@ -87,7 +87,7 @@ def zidan_show(tanke):
             z=tanke[i][2]
             zidan=Zidan(screen,x,y,z)
             zidan_list.append(zidan)
-            print(len(zidan_list))
+            # print(len(zidan_list))
     for i in zidan_list:
         if i.die():
             zidan_list.remove(i)
@@ -108,7 +108,7 @@ def tanke_show(tanke):
             t.show()
 
 
-
+#刷新显示桌面
 
 def game_main(tanke):
     screen.fill(SCREEN_COLLOR)
