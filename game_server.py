@@ -4,25 +4,49 @@ from os import fork
 from multiprocessing import  Pipe,Queue
 from time import sleep
 from sys import exit
-
+from random import randint
+from threading import Thread
 
 s=socket(family=AF_INET,type=SOCK_STREAM,proto=0)
 s.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
 s.bind(("0.0.0.0",6999))
-s.listen(3)
+s.listen(5)
 socket_l=Queue()
 socket_L=Queue()
 l={}
 fa1,fa2=Pipe(False)
+fb1,fb2=Pipe(False)
+
+
+#发送补给数据
+def shuju_b(c):
+    while True:
+        x=randint(50,750)
+        y=randint(50,550)
+        data="#"+","+str(x)+","+str(y)
+        print(data)
+        if len(data) !=20:
+            n=15-len(data)
+            data=data+","+"#"*(n-1)
+        c.send(data.encode())
+        data=fb1.recv()
+        print(data)
 #接受玩家的数据 
 def shuju_s(c,name):
+    t=Thread(target=shuju_b,args=(c,))
+    t.start()
     while True:
-        data=c.recv(15)
+        data=c.recv(20)
         if data==b"":
             socket_L.put(name)
             exit()
+            c.close()
         else:
-            fa2.send(data)
+            if data ==b"#":
+                fb2.send(data)
+            else:
+                fa2.send(data)
+        
 #把接受的任意来源的数据发送给所有人
 def shuju_f():
     #把退出了的客户端放在一个列表
