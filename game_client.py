@@ -8,7 +8,11 @@ import random
 from time import sleep
 from threading import Thread
 from game_main import *
+import os
 
+
+#图片加载一直报警告,百度都没N长时间都没解决,这里清屏骗骗自己
+os.system("clear")
 print("1.单人游戏")
 print("2.双人游戏")
 print("3.三人游戏")
@@ -35,7 +39,11 @@ elif player==3:
 else:
     ADDR=6999
 c=socket()
-c.connect(("127.0.0.1",ADDR))
+try:
+    c.connect(("127.0.0.1",ADDR))
+except:
+    print("服务器异常")
+    exit()
 # c.connect(("192.168.207.132",6999))
 # c.connect(("192.168.43.161",6995))
 # c.connect(("172.40.78.146",6999))
@@ -43,6 +51,7 @@ c.connect(("127.0.0.1",ADDR))
 fa1,fa2=Pipe()
 fb1,fb2=Pipe()
 q=Queue()
+q1=Queue()
 
 name=input("输入昵称：")
 while True:
@@ -70,9 +79,11 @@ def shuju_f(c):
             y=data[1]
             z=data[2]
             e=data[3]
+            f=data[4]
+            l=data[5]
             #用＠来区别数据是坦克的数据
-            data="@"+","+name+","+str(x)+","+str(y)+","+str(z)+","+str(e)
-            #用户名最大７个字符
+            data="@"+","+name+","+str(x)+","+str(y)+","+str(z)+","+str(e)+","+str(f)+","+str(l)
+            #用户名最大8个字符
             if len(data) !=25:
                 n=20-len(data)
                 data=data+","+"#"*(n-1)
@@ -99,7 +110,9 @@ def shuju_s(c):
             y=data_tanke[3]
             z=data_tanke[4]
             e=data_tanke[5]
-            q.put(["@",name,int(x),int(y),int(z),int(e)])
+            f=data_tanke[6]
+            l=data_tanke[7]
+            q.put(["@",name,int(x),int(y),int(z),int(e),int(f),int(l)])
             #处理进程退出
             if NAME==name and int(z)==0:
                 exit()
@@ -110,12 +123,13 @@ def shuju_s(c):
                 sleep(3)
                 fb2.send("OK")
                 n+=1
-            print(data)
+            # print(data)
             data_buji=data.copy()
             x=data_buji[1]
             y=data_buji[2]
             z=data_buji[3]
             q.put(["#",int(x),int(y),int(z)])
+        #等待玩家连入游戏
         elif data[0]=="$":
             print(data[1])
 
@@ -130,11 +144,24 @@ def shuju():
     z=random.randint(1,4)
     #e=1的时候发射一颗子弹
     e=0
+    #默认0分
+    f=0
+    #默认3生命值
+    l=3
     move_speed=5
     move_x=0
     move_y=0
     while True:
         sleep(0.05)
+        try :
+            data=q1.get(False)
+        except:
+            pass
+        else:
+            if data=="l-":
+                l-=1
+            elif data=="l+":
+                l+=1
         for event in pygame.event.get():
             if event.type==QUIT:
                 z=0
@@ -156,10 +183,9 @@ def shuju():
             if event.type==KEYUP:
                 move_x=0
                 move_y=0
-                # e=0
         x+=move_x
         y+=move_y
-        fa2.send((x,y,z,e))
+        fa2.send((x,y,z,e,f,l))
         e=0
         #处理进程退出
         if z==0:
@@ -167,8 +193,10 @@ def shuju():
 
 #游戏主逻辑模块
 def main():
+    #存放坦克的位置,方向,是否发子弹等信息
     tanke={}
     die_tanke_list=[]
+
     while True:
         try:
             data=q.get(False)
@@ -184,9 +212,8 @@ def main():
                 data_none=data.copy()
                 data_none[5]=0
 
-        # if data[0] in die_tanke_list:
-        #     continue
-        # print(data)
+    
+        #收到的是坦克信息
         if data[0]=="@":
             if data[4]==0:
                 if data[1] in die_tanke_list:
@@ -199,28 +226,34 @@ def main():
                 except:
                     continue
                 else:
-                    print(tanke)
-                    # print(tanke)
                         #处理进程退出
                     if data[1]==NAME:
                         exit()
-                    # continue
             else:
                 if data[1] in die_tanke_list:
                     continue
 
             #这里数据放入列表方便后面更改数据
-            tanke[data[1]]=[data[2],data[3],data[4],data[5]]
+            tanke[data[1]]=[data[2],data[3],data[4],data[5],data[6],data[7]]
+
+        #收到的是补给信息
         elif data[0]=="#":
             tanke["buji"]=[data[1],data[2],data[3]]
+        #打印坦克信息(测试)
         # print(tanke)
-        die_tanke,die_buji,tanke_buji=game_main(tanke)
+        die_tanke,die_buji,tanke_buji=game_main(tanke,NAME)
+        if data[0]=="@" and data[5]==1:
+            tanke[data_none[1]]=[data_none[2],data_none[3],data_none[4],data_none[5],data_none[6],data_none[7]]
         if die_tanke ==0:
             pass
         else:
-            print("sssssssssssssss")
-            tanke.pop(die_tanke)
-            die_tanke_list.append(die_tanke)
+            if tanke[die_tanke][5]==1:
+                tanke.pop(die_tanke)
+                die_tanke_list.append(die_tanke)
+            if die_tanke==NAME:
+                q1.put("l-")
+
+
         if die_buji:
             tanke.pop("buji")
             if tanke_buji==NAME:

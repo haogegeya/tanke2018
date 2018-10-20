@@ -3,26 +3,24 @@ from pygame.locals import *
 from random import randint,choice
 from time import sleep
 from sys import exit
-from xiangjiaopanduan import *
+from xiangjiaopanduan import*
 pygame.init() 
+screen=pygame.display.set_mode((800,600),0,32)
+
 beijin=pygame.image.load("./image/Beijin.jpg")
-herol=pygame.image.load("./image/tanke_l.png")
-heror=pygame.image.load("./image/tanke_r.png")
-herou=pygame.image.load("./image/tanke_u.png")
-herod=pygame.image.load("./image/tanke_d.png")
-herour=pygame.image.load("./image/tanke_ur.png")
-zidan1=pygame.image.load("./image/zidan1.png")
-buji1=pygame.image.load("./image/buji1.png")
-buji2=pygame.image.load("./image/buji2.png")
+herol=pygame.image.load("./image/tanke_l.png").convert()
+heror=pygame.image.load("./image/tanke_r.png").convert()
+herou=pygame.image.load("./image/tanke_u.png").convert()
+herod=pygame.image.load("./image/tanke_d.png").convert()
+herour=pygame.image.load("./image/tanke_ur.png").convert()
+zidan1=pygame.image.load("./image/zidan1.png").convert()
+buji1=pygame.image.load("./image/buji1.png").convert()
+buji2=pygame.image.load("./image/buji2.png").convert()
 tanke_image={"l":herol,"r":heror,"u":herou,"d":herod}
 buji_image={1:buji1,2:buji2}
 
-font_D=pygame.font.SysFont("Arial",16)
-font_f=pygame.font.SysFont("Arial",16)
-font_s=pygame.font.SysFont("Arial",16)
-font_t=pygame.font.SysFont("Arial",16)
+font=pygame.font.SysFont("Arial",16)
 
-screen=pygame.display.set_mode((800,600),0,32)
 SCREEN_COLLOR=(255,255,255)
 
 z_width=zidan1.get_width()
@@ -36,6 +34,8 @@ zidan_list=[]
 #解决机器差异存在子弹不同步问题
 clock=pygame.time.Clock()
 n=0
+
+
 #坦克类
 class Tanke():
     def __init__(self,screen,x,y,z):
@@ -110,7 +110,6 @@ class Buji():
             if i !="buji":
                 x=tanke[i][0]
                 y=tanke[i][1]
-                print(x,y)
                 if ju_ju(x,y,t_width,t_height,self.x,self.y,b_width,b_height):
                     return True,i
         return False,0
@@ -136,6 +135,7 @@ def zidan_show(tanke):
 
 
                 zidan_list.append(zidan)
+            #打印子弹个数(测试)
             # print(len(zidan_list))
     time=0
     for i in zidan_list:
@@ -158,7 +158,7 @@ def zidan_show(tanke):
 #显示坦克的位置
 def tanke_show(tanke):
     global zidan_list
-    print(tanke)
+    # print(tanke)
     for i in tanke:
         if i !="buji":
             x=tanke[i][0]
@@ -168,7 +168,11 @@ def tanke_show(tanke):
             tanke_die,zidan_die=t.tanke_die(zidan_list)
             if tanke_die:
                 zidan_list.remove(zidan_die)
-                return i
+                if tanke[i][5]>=2:
+                    t.show()
+                    return i
+                else:
+                    return i
             else:
                 t.show()
 
@@ -189,14 +193,23 @@ def buji_show(tanke):
 
 
 #显示分数等信息
-def wenzi(screen):
-    text_f=font_f.render()
+def wenzi(tanke,NAME):
+    for i in tanke:
+        if i==NAME:
+            print(tanke[i])
+            text_f=str(tanke[i][4])
+            text_l=str(tanke[i][5])
+            font_f=font.render(text_f,True,(255,255,255))
+            font_l=font.render(text_l,True,(255,255,255))
+            screen.blit(font_f,(730,50))
+            screen.blit(font_l,(730,80))
+            break
 
 
 
 #刷新显示桌面
 
-def game_main(tanke):
+def game_main(tanke,NAME):
     # screen.fill(SCREEN_COLLOR)
     screen.blit(beijin,(0,0))
     #tanke_die有坦克打死返回坦克名,没有返回0
@@ -204,5 +217,7 @@ def game_main(tanke):
     zidan_show(tanke)
     #buji_die是补给是否被吃了,buji_tanke是谁吃了
     buji_die,buji_tanke=buji_show(tanke)
+
+    wenzi(tanke,NAME)
     pygame.display.update()
     return tanke_die,buji_die,buji_tanke
