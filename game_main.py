@@ -1,17 +1,27 @@
 import pygame
 from pygame.locals import *
-from random import randint
+from random import randint,choice
 from time import sleep
 from sys import exit
 from xiangjiaopanduan import *
 pygame.init() 
+beijin=pygame.image.load("./image/Beijin.jpg")
 herol=pygame.image.load("./image/tanke_l.png")
 heror=pygame.image.load("./image/tanke_r.png")
 herou=pygame.image.load("./image/tanke_u.png")
 herod=pygame.image.load("./image/tanke_d.png")
+herour=pygame.image.load("./image/tanke_ur.png")
 zidan1=pygame.image.load("./image/zidan1.png")
-zidan2=pygame.image.load("./image/zidian2.bmp")
+buji1=pygame.image.load("./image/buji1.png")
+buji2=pygame.image.load("./image/buji2.png")
 tanke_image={"l":herol,"r":heror,"u":herou,"d":herod}
+buji_image={1:buji1,2:buji2}
+
+font_D=pygame.font.SysFont("Arial",16)
+font_f=pygame.font.SysFont("Arial",16)
+font_s=pygame.font.SysFont("Arial",16)
+font_t=pygame.font.SysFont("Arial",16)
+
 screen=pygame.display.set_mode((800,600),0,32)
 SCREEN_COLLOR=(255,255,255)
 
@@ -87,13 +97,14 @@ class Zidan():
 
 #补给类
 class Buji():
-    def __init__(self,screen,x,y,image=zidan2):
+    def __init__(self,screen,x,y,z):
         self.screen=screen
-        self.image=image
+        self.image=buji_image
         self.x=x
         self.y=y
+        self.z=z
     def show(self):
-        self.screen.blit(self.image,(self.x,self.y))
+        self.screen.blit(self.image[self.z],(self.x,self.y))
     def eat_buji(self,tanke):
         for i in tanke:
             if i !="buji":
@@ -160,6 +171,8 @@ def tanke_show(tanke):
                 return i
             else:
                 t.show()
+
+
     return 0
 
 #处理补给
@@ -167,15 +180,25 @@ def buji_show(tanke):
     if "buji" in tanke:
         x=tanke["buji"][0]
         y=tanke["buji"][1]
-        buji=Buji(screen,x,y)
+        z=tanke["buji"][2]
+        buji=Buji(screen,x,y,z)
         buji.show()
         return buji.eat_buji(tanke)
     else:
         return False,0
+
+
+#显示分数等信息
+def wenzi(screen):
+    text_f=font_f.render()
+
+
+
 #刷新显示桌面
 
 def game_main(tanke):
-    screen.fill(SCREEN_COLLOR)
+    # screen.fill(SCREEN_COLLOR)
+    screen.blit(beijin,(0,0))
     #tanke_die有坦克打死返回坦克名,没有返回0
     tanke_die=tanke_show(tanke)
     zidan_show(tanke)

@@ -9,14 +9,14 @@ from threading import Thread
 
 s=socket(family=AF_INET,type=SOCK_STREAM,proto=0)
 s.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
-s.bind(("0.0.0.0",6996))
+s.bind(("0.0.0.0",6998))
 s.listen(5)
 socket_l=Queue()
 socket_L=Queue()
 l={}
 fa1,fa2=Pipe(False)
 fb1,fb2=Pipe(False)
-player=1
+player=3
 
 
 

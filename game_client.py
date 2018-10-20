@@ -9,14 +9,39 @@ from time import sleep
 from threading import Thread
 from game_main import *
 
+print("1.单人游戏")
+print("2.双人游戏")
+print("3.三人游戏")
+print("4.多人乱斗")
+while True:
+    try:
+        player=int(input("请输入"))
+    except:
+        print("输入错误,重新输入")
+        continue
+    else:
+        if player not in (1,2,3,4,5):
+            print("输入错误,重新输入")
+            continue
+        else:
+            break
+
+if player==1:
+    ADDR=6996
+elif player==2:
+    ADDR=6997
+elif player==3:
+    ADDR=6998
+else:
+    ADDR=6999
 c=socket()
-c.connect(("127.0.0.1",6999))
+c.connect(("127.0.0.1",ADDR))
 # c.connect(("192.168.207.132",6999))
 # c.connect(("192.168.43.161",6995))
 # c.connect(("172.40.78.146",6999))
 #后面收数据，发数据，产生数据模块，游戏主逻辑分为四个进程，下面管道用于进程通信
 fa1,fa2=Pipe()
-# fb1,fb2=Pipe()
+fb1,fb2=Pipe()
 q=Queue()
 
 name=input("输入昵称：")
@@ -25,8 +50,12 @@ while True:
     data=c.recv(128)
     if data==b"OK":
         NAME=name
+        # fb2.send("OK")
         break
+    elif data==b"NO":
+        name=input("重复了，重新输入：")
     else:
+        print(data.decode())
         name=input("重复了，重新输入：")
 
 #发送数据模块
@@ -44,19 +73,22 @@ def shuju_f(c):
             #用＠来区别数据是坦克的数据
             data="@"+","+name+","+str(x)+","+str(y)+","+str(z)+","+str(e)
             #用户名最大７个字符
-            if len(data) !=20:
-                n=15-len(data)
+            if len(data) !=25:
+                n=20-len(data)
                 data=data+","+"#"*(n-1)
             c.send(data.encode())
             # print(data)
-            #处理进程退出
             if z==0:
+                #主动告诉服务器要退出了
+                c.send(b"@@")
+            #处理进程退出
                 break
 
 #接受数据模块
 def shuju_s(c):
+    n=0
     while True:
-        data=c.recv(20)
+        data=c.recv(25)
         # print(data.decode())
         data=data.decode().split(",")
         if data[0]=="@":
@@ -72,14 +104,26 @@ def shuju_s(c):
             if NAME==name and int(z)==0:
                 exit()
         elif data[0]=="#":
+            if n==0:
+                print("等待玩家加入(%d/%d)"%(player,player))
+                print("3秒后开始游戏")
+                sleep(3)
+                fb2.send("OK")
+                n+=1
             print(data)
             data_buji=data.copy()
             x=data_buji[1]
             y=data_buji[2]
-            q.put(["#",int(x),int(y)])
+            z=data_buji[3]
+            q.put(["#",int(x),int(y),int(z)])
+        elif data[0]=="$":
+            print(data[1])
+
 
 #数据产生及更新模块
 def shuju():
+    if ADDR!=6999:
+        data=fb1.recv()
     x=random.randrange(800)
     y=random.randrange(600)
     #z用来判断坦克方向
@@ -168,7 +212,7 @@ def main():
             #这里数据放入列表方便后面更改数据
             tanke[data[1]]=[data[2],data[3],data[4],data[5]]
         elif data[0]=="#":
-            tanke["buji"]=[data[1],data[2]]
+            tanke["buji"]=[data[1],data[2],data[3]]
         # print(tanke)
         die_tanke,die_buji,tanke_buji=game_main(tanke)
         if die_tanke ==0:
