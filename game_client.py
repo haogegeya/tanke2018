@@ -5,7 +5,7 @@ from sys import exit
 from socket import socket
 from multiprocessing import Process,Pipe,Queue
 import random
-from time import sleep
+from time import sleep,time
 from threading import Thread
 from game_main import *
 import os
@@ -162,6 +162,14 @@ def shuju():
                 l-=1
             elif data=="l+":
                 l+=1
+            elif data=="f1+":
+                f+=1
+            elif data=="f3+":
+                f+=3
+            elif data=="f5+":
+                f+=5
+            elif data=="t":
+                z=0
         for event in pygame.event.get():
             if event.type==QUIT:
                 z=0
@@ -196,7 +204,7 @@ def main():
     #存放坦克的位置,方向,是否发子弹等信息
     tanke={}
     die_tanke_list=[]
-
+    n=0
     while True:
         try:
             data=q.get(False)
@@ -233,6 +241,7 @@ def main():
                 if data[1] in die_tanke_list:
                     continue
 
+
             #这里数据放入列表方便后面更改数据
             tanke[data[1]]=[data[2],data[3],data[4],data[5],data[6],data[7]]
 
@@ -241,9 +250,23 @@ def main():
             tanke["buji"]=[data[1],data[2],data[3]]
         #打印坦克信息(测试)
         # print(tanke)
-        die_tanke,die_buji,tanke_buji=game_main(tanke,NAME)
+
+
+        if n==0:
+            time_start=time()
+            n+=1
+        die_tanke,die_zidan,die_buji,tanke_buji,time_if=game_main(tanke,NAME,time_start)
+
+        #保证按一次空格发射一颗子弹
         if data[0]=="@" and data[5]==1:
             tanke[data_none[1]]=[data_none[2],data_none[3],data_none[4],data_none[5],data_none[6],data_none[7]]
+        #时间到了
+        if time_if:
+            print("结束游戏")
+            # sleep(3)
+            fb2.send(tanke)
+            q1.put("t")
+
         if die_tanke ==0:
             pass
         else:
@@ -252,12 +275,22 @@ def main():
                 die_tanke_list.append(die_tanke)
             if die_tanke==NAME:
                 q1.put("l-")
+            if die_zidan==NAME:
+                q1.put("l+")
 
 
         if die_buji:
+            buji_lei=tanke["buji"][2]
             tanke.pop("buji")
             if tanke_buji==NAME:
                 fa2.send("#")
+                if buji_lei==1:
+                    q1.put("f1+")
+                elif buji_lei==2:
+                    q1.put("f3+")
+                else:
+                    q1.put("f5+")
+
         sleep(0.001)
 
 
@@ -276,5 +309,12 @@ for i in range(4):
 
 for i in p_list:
     i.join()
-# sleep(100)
 c.close()
+data=fb1.recv()
+# sleep(100)
+fenshu={}
+for name in data:
+    if name !="buji":
+        fenshu[name]=[data[name][4],data[name][5]]
+
+jieguo(fenshu)

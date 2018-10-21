@@ -24,7 +24,7 @@ player=3
 def shuju_buji():
     x=randint(50,750)
     y=randint(50,550)
-    z=choice((1,2,2,2,2))
+    z=choice([1,2,1,3,1,1,1,2,1])
     data="#"+","+str(x)+","+str(y)+","+str(z)
     if len(data) !=25:
             n=25-len(data)
