@@ -40,7 +40,7 @@ else:
     ADDR=6999
 c=socket()
 try:
-    c.connect(("127.0.0.1",ADDR))
+    c.connect(("172.40.78.147",ADDR))
 except:
     print("服务器异常")
     exit()
@@ -170,6 +170,13 @@ def shuju():
                 f+=5
             elif data=="t":
                 z=0
+            elif data=="l0":
+                f=0
+                l=3
+            elif type(data)==int:
+                f+=data
+                l+=1
+
         for event in pygame.event.get():
             if event.type==QUIT:
                 z=0
@@ -206,37 +213,35 @@ def main():
     die_tanke_list=[]
     n=0
     while True:
-        try:
-            data=q.get(False)
-        except:
-            try:
-                data=data_none
-            except:
-                continue
-            else:
-                pass
-        else:
-            if data[0]=="@":
-                data_none=data.copy()
-                data_none[5]=0
-
+        # try:
+        #     data=q.get(False)
+        # except:
+        #     try:
+        #         data=data_none
+        #     except:
+        #         continue
+        #     else:
+        #         pass
+        # else:
+        #     if data[0]=="@":
+        #         data_none=data.copy()
+        #         data_none[5]=0
+        data=q.get()
     
         #收到的是坦克信息
         if data[0]=="@":
             if data[4]==0:
-                if data[1] in die_tanke_list:
-                    die_tanke_list.remove(data[1])
-                    if data[1]==NAME:
-                        exit()
+                if data[1]==NAME:
+                    exit()
+                else:
+                    if data[1] in die_tanke_list:
+                        die_tanke_list.remove(data[1])
                 #处理其他坦克退出
                 try:
                     tanke.pop(data[1])
                 except:
                     continue
-                else:
-                        #处理进程退出
-                    if data[1]==NAME:
-                        exit()
+                
             else:
                 if data[1] in die_tanke_list:
                     continue
@@ -255,11 +260,12 @@ def main():
         if n==0:
             time_start=time()
             n+=1
-        die_tanke,die_zidan,die_buji,tanke_buji,time_if=game_main(tanke,NAME,time_start)
-
+        die_tanke,die_zidan,die_buji,tanke_buji,time_if,if_birth=game_main(tanke,NAME,time_start)
+        if if_birth==1:
+            die_tanke_list=[]
         #保证按一次空格发射一颗子弹
         if data[0]=="@" and data[5]==1:
-            tanke[data_none[1]]=[data_none[2],data_none[3],data_none[4],data_none[5],data_none[6],data_none[7]]
+            tanke[data[1]][3]=0
         #时间到了
         if time_if:
             print("结束游戏")
@@ -270,13 +276,24 @@ def main():
         if die_tanke ==0:
             pass
         else:
-            if tanke[die_tanke][5]==1:
-                tanke.pop(die_tanke)
-                die_tanke_list.append(die_tanke)
+            # if tanke[die_tanke][5]==1:
+            #     tanke.pop(die_tanke)
+            #     die_tanke_list.append(die_tanke)
             if die_tanke==NAME:
-                q1.put("l-")
-            if die_zidan==NAME:
-                q1.put("l+")
+                if tanke[die_tanke][5]==1:
+                    q1.put("l0")
+                    tanke.pop(die_tanke)
+                    die_tanke_list.append(die_tanke)
+                else:
+                    q1.put("l-")
+            elif die_zidan==NAME:
+                if tanke[die_tanke][5]==1:
+                    q1.put(tanke[die_tanke][4])
+                    tanke.pop(die_tanke)
+                    die_tanke_list.append(die_tanke)
+                else:
+                    q1.put("l+")
+
 
 
         if die_buji:
@@ -310,11 +327,13 @@ for i in range(4):
 for i in p_list:
     i.join()
 c.close()
-data=fb1.recv()
-# sleep(100)
-fenshu={}
-for name in data:
-    if name !="buji":
-        fenshu[name]=[data[name][4],data[name][5]]
 
-jieguo(fenshu)
+
+# data=fb1.recv()
+# sleep(100)
+# fenshu={}
+# for name in data:
+#     if name !="buji":
+#         fenshu[name]=[data[name][4],data[name][5]]
+
+# jieguo(fenshu)

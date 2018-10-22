@@ -139,8 +139,8 @@ def zidan_show(tanke):
 
 
                 zidan_list.append(zidan)
-            #打印子弹个数(测试)
-            # print(len(zidan_list))
+                #打印子弹个数(测试)
+                print(len(zidan_list))
     time=0
     for i in zidan_list:
         if i.die():
@@ -198,24 +198,53 @@ def buji_show(tanke):
 
 #显示分数等信息
 def wenzi(tanke,NAME,time_start):
+    if_true=0
+    if_birth=0
+    time_now=time()
+    time_run=round(time_now-time_start)
     for i in tanke:
         if i==NAME:
-            time_now=time()
-            time_run=round(time_now-time_start)
             text_t=str(150-time_run)
             if time_run>=150:
-                return True
+                if_true=1
+            
             # print(tanke[i])
-            text_f=str(tanke[i][4])
-            text_l=str(tanke[i][5])
+            else:
+                text_f=str(tanke[i][4])
+                text_l=str(tanke[i][5])
 
-            font_t=font.render(text_t,True,(255,255,255))
-            font_f=font.render(text_f,True,(255,255,255))
-            font_l=font.render(text_l,True,(255,255,255))
-            screen.blit(font_t,(730,10))
-            screen.blit(font_f,(730,40))
-            screen.blit(font_l,(730,70))
-            return False
+                font_t=font.render(text_t,True,(255,255,255))
+                font_f=font.render(text_f,True,(255,255,255))
+                font_l=font.render(text_l,True,(255,255,255))
+                screen.blit(font_t,(730,10))
+                screen.blit(font_f,(730,40))
+                screen.blit(font_l,(730,70))
+        else:
+            if i !="buji":
+                x=tanke[i][0]
+                y=tanke[i][1]
+                z=tanke[i][2]
+                text_f=str(tanke[i][4])
+                text_l=str(tanke[i][5])
+                font_f=font.render(text_f,True,(0,0,200))
+                font_l=font.render(text_l,True,(200,0,0))
+                if z==1:
+                    screen.blit(font_f,(x,y+t_height+5))
+                    screen.blit(font_l,(x+25,y+t_height+5))
+                else:
+                    screen.blit(font_f,(x,y-25))
+                    screen.blit(font_l,(x+25,y-25))
+    try:
+        if time_run%10==0:
+            if_birth=1
+    except:
+        if_birth=0
+    if if_true==1:
+        return True,if_birth
+    else:
+        return False,if_birth
+
+
 
 #游戏结果
 def jieguo(tanke_jieguo):
@@ -262,7 +291,7 @@ def game_main(tanke,NAME,time_start):
     #buji_die是补给是否被吃了,buji_tanke是谁吃了
     buji_die,buji_tanke=buji_show(tanke)
 
-    time_if=wenzi(tanke,NAME,time_start)
+    time_if,if_birth=wenzi(tanke,NAME,time_start)
     pygame.display.update()
     #四个参数分别表示击中的坦克，击中坦克的子弹，补给是否被吃，谁吃了补给
-    return tanke_die,zidan_die,buji_die,buji_tanke,time_if
+    return tanke_die,zidan_die,buji_die,buji_tanke,time_if,if_birth
