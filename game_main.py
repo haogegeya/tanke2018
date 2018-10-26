@@ -7,7 +7,7 @@ from xiangjiaopanduan import*
 pygame.init() 
 screen=pygame.display.set_mode((800,600),0,32)
 
-beijin=pygame.image.load("./image/Beijin.jpg")
+beijin=pygame.image.load("./image/beijing1.jpg")
 herol=pygame.image.load("./image/tanke_l.png")
 heror=pygame.image.load("./image/tanke_r.png")
 herou=pygame.image.load("./image/tanke_u.png")
@@ -17,14 +17,18 @@ zidan1=pygame.image.load("./image/zidan1.png")
 buji1=pygame.image.load("./image/buji1.png")
 buji2=pygame.image.load("./image/buji2.png")
 buji3=pygame.image.load("./image/buji3.png")
+dengru=pygame.image.load("./image/dengru.jpg")
 tanke_image={"l":herol,"r":heror,"u":herou,"d":herod}
 buji_image={1:buji1,2:buji2,3:buji3}
 
+
+shitou=[(627,427,56,71),(525,132,82,57),(145,288,87,65)]
 font=pygame.font.SysFont("Arial",20)
 # font1=pygame.font.SysFont("Arial",40)
 
 SCREEN_COLLOR=(255,255,255)
-
+screen.blit(dengru,(0,0))
+pygame.display.update()
 z_width=zidan1.get_width()
 z_height=zidan1.get_height()
 t_width=herol.get_width()
@@ -35,7 +39,6 @@ b_height=zidan1.get_height()
 zidan_list=[]
 #解决机器差异存在子弹不同步问题
 clock=pygame.time.Clock()
-n=0
 
 
 #坦克类
@@ -97,6 +100,14 @@ class Zidan():
             return True
         if self.y>=600:
             return True
+        for i in shitou:
+            x=i[0]
+            y=i[1]
+            w=i[2]
+            h=i[3]
+            if ju_ju(self.x,self.y,z_width,z_height,x,y,w,h):
+                return True
+        return False
 
 #补给类
 class Buji():
@@ -118,7 +129,7 @@ class Buji():
         return False,0
 
 #处理所有坦克的子弹
-def zidan_show(tanke):
+def zidan_show(tanke,time_passed_seconds):
     global zidan_list,n
     for i in tanke:
         if i !="buji":
@@ -141,23 +152,23 @@ def zidan_show(tanke):
                 zidan_list.append(zidan)
                 #打印子弹个数(测试)
                 print(len(zidan_list))
-    time=0
     for i in zidan_list:
         if i.die():
             zidan_list.remove(i)
         i.show()
-        #让代码只在第一次循环时候执行下面这段代码
-        if n==0:
-            time_passed=clock.tick()
-            n+=1
-        else:
-            time_passed=clock.tick()
-            time_passed_seconds=time_passed/1000.0
-            if time!=0:
-                pass
-            else:
-                time=time_passed_seconds
-            i.move(time)
+        i.move(time_passed_seconds)
+        # #让代码只在第一次循环时候执行下面这段代码
+        # if n==0:
+        #     time_passed=clock.tick()
+        #     n+=1
+        # else:
+        #     time_passed=clock.tick()
+        #     time_passed_seconds=time_passed/1000.0
+        #     if time!=0:
+        #         pass
+        #     else:
+        #         time=time_passed_seconds
+        #     i.move(time)
 
 
 #显示坦克的位置
@@ -204,8 +215,8 @@ def wenzi(tanke,NAME,time_start):
     time_run=round(time_now-time_start)
     for i in tanke:
         if i==NAME:
-            text_t=str(150-time_run)
-            if time_run>=150:
+            text_t=str(7-time_run)
+            if time_run>=7:
                 if_true=1
             
             # print(tanke[i])
@@ -216,9 +227,9 @@ def wenzi(tanke,NAME,time_start):
                 font_t=font.render(text_t,True,(255,255,255))
                 font_f=font.render(text_f,True,(255,255,255))
                 font_l=font.render(text_l,True,(255,255,255))
-                screen.blit(font_t,(730,10))
-                screen.blit(font_f,(730,40))
-                screen.blit(font_l,(730,70))
+                screen.blit(font_t,(745,11))
+                screen.blit(font_f,(745,37))
+                screen.blit(font_l,(745,63))
         else:
             if i !="buji":
                 x=tanke[i][0]
@@ -248,46 +259,46 @@ def wenzi(tanke,NAME,time_start):
 
 #游戏结果
 def jieguo(tanke_jieguo):
-    pygame.display.update()
-    screen.fill((255,255,255))
-    pygame.display.update()
-    n=10
+    # print("ggggggggggg")
+    screen.fill((255,255,0))
+    # pygame.display.update()
+    # sleep(5)
+    # screen.fill((255,255,255))
+    # pygame.display.update()
+    # n=10
     x=350
     y=100
-    while True:
-        for i in tanke_jieguo:
-            # print("ddddddddddd")
-            text_f=str(tanke_jieguo[i][0])
-            text_l=str(tanke_jieguo[i][1])
-            font_n=font.render(i,True,(0,0,255))
-            font_f=font.render(text_f,True,(0,0,255))
-            font_l=font.render(text_l,True,(0,0,255))
-            screen.blit(font_n,(x,y))
-            screen.blit(font_f,(x+20,y))
-            screen.blit(font_l,(x+20,y))
-            y+40
-            x=350
-        text_n=str(n)
-        font_text=font.render(text_n,True,(0,0,0))
-        screen.blit(font_text,(x,y))
-        print(screen)
-        # sleep(3)
-        # pygame.display.update()
-        if n==0:
-            break
-        sleep(1)
-        n-=1
+    # while True:
+    for i in tanke_jieguo:
+        print("ddddddddddd")
+        text_f=str(tanke_jieguo[i][0])
+        text_l=str(tanke_jieguo[i][1])
+        font_n=font.render(i,True,(0,0,255))
+        font_f=font.render(text_f,True,(0,0,255))
+        font_l=font.render(text_l,True,(0,0,255))
+        screen.blit(font_n,(x,y))
+        screen.blit(font_f,(x+50,y))
+        screen.blit(font_l,(x+50,y))
+        y+=40
+        x=350
+        # text_n=str(n)
+        # font_text=font.render(text_n,True,(0,0,0))
+        # screen.blit(font_text,(x,y))
+    print(screen)
+    sleep(5)
+    pygame.display.update()
+    sleep(5)
 
 
 
 #刷新显示桌面
 
-def game_main(tanke,NAME,time_start):
+def game_main(tanke,NAME,time_start,time_passed_seconds):
     # screen.fill(SCREEN_COLLOR)
     screen.blit(beijin,(0,0))
     #tanke_die有坦克打死返回坦克名,没有返回0
     tanke_die,zidan_die=tanke_show(tanke)
-    zidan_show(tanke)
+    zidan_show(tanke,time_passed_seconds)
     #buji_die是补给是否被吃了,buji_tanke是谁吃了
     buji_die,buji_tanke=buji_show(tanke)
 

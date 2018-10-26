@@ -9,6 +9,7 @@ from time import sleep,time
 from threading import Thread
 from game_main import *
 import os
+from xiangjiaopanduan import ju_ju
 
 
 #图片加载一直报警告,百度都没N长时间都没解决,这里清屏骗骗自己
@@ -200,6 +201,24 @@ def shuju():
                 move_y=0
         x+=move_x
         y+=move_y
+        if x<0:
+            x=0
+        elif x>750:
+            x=750
+        if y<0:
+            y=0
+        elif y>550:
+            y=550
+        if ju_ju(x,y,50,50,145,288,87,57):
+            x-=move_x
+            y-=move_y
+        if ju_ju(x,y,50,50,525,132,82,57):
+            x-=move_x
+            y-=move_y
+        if ju_ju(x,y,50,50,627,427,56,71):
+            x-=move_x
+            y-=move_y
+        #  
         fa2.send((x,y,z,e,f,l))
         e=0
         #处理进程退出
@@ -212,6 +231,7 @@ def main():
     tanke={}
     die_tanke_list=[]
     n=0
+    m=0
     while True:
         # try:
         #     data=q.get(False)
@@ -256,11 +276,18 @@ def main():
         #打印坦克信息(测试)
         # print(tanke)
 
-
+        # 让循环只在第一次执行下面两段代码
         if n==0:
             time_start=time()
             n+=1
-        die_tanke,die_zidan,die_buji,tanke_buji,time_if,if_birth=game_main(tanke,NAME,time_start)
+        if m==0:
+            time_passed=clock.tick()
+            m+=1
+        #获取每次循环的时间差
+        time_passed=clock.tick()
+        time_passed_seconds=time_passed/1000.0
+
+        die_tanke,die_zidan,die_buji,tanke_buji,time_if,if_birth=game_main(tanke,NAME,time_start,time_passed_seconds)
         if if_birth==1:
             die_tanke_list=[]
         #保证按一次空格发射一颗子弹
@@ -280,14 +307,14 @@ def main():
             #     tanke.pop(die_tanke)
             #     die_tanke_list.append(die_tanke)
             if die_tanke==NAME:
-                if tanke[die_tanke][5]==1:
+                if tanke[die_tanke][5]<=1:
                     q1.put("l0")
                     tanke.pop(die_tanke)
                     die_tanke_list.append(die_tanke)
                 else:
                     q1.put("l-")
             elif die_zidan==NAME:
-                if tanke[die_tanke][5]==1:
+                if tanke[die_tanke][5]<=1:
                     q1.put(tanke[die_tanke][4])
                     tanke.pop(die_tanke)
                     die_tanke_list.append(die_tanke)
@@ -308,7 +335,7 @@ def main():
                 else:
                     q1.put("f5+")
 
-        sleep(0.001)
+        # sleep(0.001)
 
 
 p_list=[]
@@ -329,11 +356,12 @@ for i in p_list:
 c.close()
 
 
-# data=fb1.recv()
-# sleep(100)
-# fenshu={}
-# for name in data:
-#     if name !="buji":
-#         fenshu[name]=[data[name][4],data[name][5]]
+data=fb1.recv()
+sleep(3)
+fenshu={}
+for name in data:
+    if name !="buji":
+        fenshu[name]=[data[name][4],data[name][5]]
 
-# jieguo(fenshu)
+print(fenshu)
+jieguo(fenshu)
