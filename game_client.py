@@ -33,15 +33,19 @@ while True:
 
 if player==1:
     ADDR=6996
+    pygame.mixer.music.load("./sound/gongfu.ogg")
+    pygame.mixer.music.play()
 elif player==2:
     ADDR=6997
 elif player==3:
     ADDR=6998
 else:
     ADDR=6999
+    pygame.mixer.music.load("./sound/maxituan.ogg")
+    pygame.mixer.music.play()
 c=socket()
 try:
-    c.connect(("172.40.78.147",ADDR))
+    c.connect(("127.0.0.1",ADDR))
 except:
     print("服务器异常")
     exit()
@@ -170,6 +174,7 @@ def shuju():
             elif data=="f5+":
                 f+=5
             elif data=="t":
+                sleep(10)
                 z=0
             elif data=="l0":
                 f=0
@@ -247,7 +252,7 @@ def main():
         #         data_none=data.copy()
         #         data_none[5]=0
         data=q.get()
-    
+        
         #收到的是坦克信息
         if data[0]=="@":
             if data[4]==0:
@@ -296,9 +301,17 @@ def main():
         #时间到了
         if time_if:
             print("结束游戏")
-            # sleep(3)
-            fb2.send(tanke)
             q1.put("t")
+            # sleep(3)
+            # data=fb1.recv()
+            # sleep(3)
+            fenshu={}
+            for name in tanke:
+                if name !="buji":
+                    fenshu[name]=[tanke[name][4],tanke[name][5]]
+            print(fenshu)
+            jieguo(fenshu)
+            # fb2.send(tanke)
 
         if die_tanke ==0:
             pass
@@ -356,12 +369,12 @@ for i in p_list:
 c.close()
 
 
-data=fb1.recv()
-sleep(3)
-fenshu={}
-for name in data:
-    if name !="buji":
-        fenshu[name]=[data[name][4],data[name][5]]
+# data=fb1.recv()
+# sleep(3)
+# fenshu={}
+# for name in data:
+#     if name !="buji":
+#         fenshu[name]=[data[name][4],data[name][5]]
 
-print(fenshu)
-jieguo(fenshu)
+# print(fenshu)
+# jieguo(fenshu)

@@ -22,6 +22,12 @@ tanke_image={"l":herol,"r":heror,"u":herou,"d":herod}
 buji_image={1:buji1,2:buji2,3:buji3}
 
 
+# pygame.mixer.music.load("./sound/maxituan.ogg")
+# pygame.mixer.music.load("./sound/gongfu.ogg")
+j_sound=pygame.mixer.Sound("./sound/jiesuan.ogg")
+
+
+
 shitou=[(627,427,56,71),(525,132,82,57),(145,288,87,65)]
 font=pygame.font.SysFont("Arial",20)
 # font1=pygame.font.SysFont("Arial",40)
@@ -215,8 +221,8 @@ def wenzi(tanke,NAME,time_start):
     time_run=round(time_now-time_start)
     for i in tanke:
         if i==NAME:
-            text_t=str(7-time_run)
-            if time_run>=7:
+            text_t=str(15-time_run)
+            if time_run>=15:
                 if_true=1
             
             # print(tanke[i])
@@ -260,12 +266,9 @@ def wenzi(tanke,NAME,time_start):
 #游戏结果
 def jieguo(tanke_jieguo):
     # print("ggggggggggg")
+    # pygame.mixer.music.stop()
+    # j_sound.play()
     screen.fill((255,255,0))
-    # pygame.display.update()
-    # sleep(5)
-    # screen.fill((255,255,255))
-    # pygame.display.update()
-    # n=10
     x=350
     y=100
     # while True:
@@ -278,16 +281,13 @@ def jieguo(tanke_jieguo):
         font_l=font.render(text_l,True,(0,0,255))
         screen.blit(font_n,(x,y))
         screen.blit(font_f,(x+50,y))
-        screen.blit(font_l,(x+50,y))
+        screen.blit(font_l,(x+100,y))
         y+=40
         x=350
         # text_n=str(n)
         # font_text=font.render(text_n,True,(0,0,0))
         # screen.blit(font_text,(x,y))
-    print(screen)
-    sleep(5)
     pygame.display.update()
-    sleep(5)
 
 
 
